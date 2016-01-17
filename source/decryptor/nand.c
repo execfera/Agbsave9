@@ -642,7 +642,7 @@ u32 DumpAgbSave(u32 parm)
     u32 Saveadder;
     memcpy(&Saveadder, Header + (sizeof(u8) * 0x50), sizeof(u32));
     char *Magic = ".SAV";
-    if (Saveadder != 0x200 || !memcmp(Magic, Header, sizeof(u32))) {
+    if (Saveadder != 0x200 || memcmp(Magic, Header, sizeof(u32))) {
         Debug("The Agb_save partiton is corrupted.");
         Debug("Did you run an Agb_firm game?");
         return 1;
