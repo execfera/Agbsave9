@@ -642,8 +642,11 @@ u32 DumpAgbSave(u32 parm)
     u32 Saveadder;
     memcpy(&Saveadder, Header + (sizeof(u8) * 0x50), sizeof(u32));
     if (Saveadder != 0x200) {
-        Debug("The Agb_save partiton is corrupted. Did you run an Agb_firm game?");
+        Debug("The Agb_save partiton is corrupted.");
+        Debug("Did you run an Agb_firm game?");
         return 1;
     }
-    return 0;
+    u32 Savesize;
+    memcpy(&Savesize, Header + (sizeof(u8) * 0x54), sizeof(u32));
+    return DecryptNandToFile("agb_dump.sav", p_info->offset + Saveadder, Savesize, p_info);
 }
