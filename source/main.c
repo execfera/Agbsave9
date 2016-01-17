@@ -34,7 +34,7 @@ MenuInfo menu[] =
         }
     },
     {
-        "SysNAND Options", 8,
+        "SysNAND Options", 9,
         {
             { "NAND Backup",                  &DumpNand,              0 },
             { "NAND Restore",                 &RestoreNand,           N_NANDWRITE },

@@ -636,6 +636,6 @@ u32 InjectNandPartition(u32 param)
 
 u32 DumpAgbSave(u32 parm)
 {
-    Debug("Testing123");
+    u16 Savesize;
     return 0;
 }
