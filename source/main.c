@@ -43,7 +43,8 @@ MenuInfo menu[] =
             { "File Dump...",                 NULL,                   SUBMENU_START + 4 },
             { "File Inject...",               NULL,                   SUBMENU_START + 6 },
             { "Health&Safety Dump",           &DumpHealthAndSafety,   0 },
-            { "Health&Safety Inject",         &InjectHealthAndSafety, N_NANDWRITE }
+            { "Health&Safety Inject",         &InjectHealthAndSafety, N_NANDWRITE },
+            { "Agb save dump",                &DumpAgbSave,           0 }
         }
     },
     {

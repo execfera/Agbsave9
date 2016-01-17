@@ -633,3 +633,9 @@ u32 InjectNandPartition(u32 param)
     
     return EncryptFileToNand(filename, p_info->offset, p_info->size, p_info);
 }
+
+u32 DumpAgbSave(u32 parm)
+{
+    Debug("Testing123");
+    return 0;
+}
