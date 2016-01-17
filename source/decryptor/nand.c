@@ -636,6 +636,14 @@ u32 InjectNandPartition(u32 param)
 
 u32 DumpAgbSave(u32 parm)
 {
-    u16 Savesize;
+    PartitionInfo* p_info = GetPartitionInfo(P_AGBSAVE);
+    u8 Header[NAND_SECTOR_SIZE];
+    DecryptNandToMem(Header, p_info->offset, NAND_SECTOR_SIZE, p_info);
+    u32 Saveadder;
+    memcpy(&Saveadder, Header + (sizeof(u8) * 0x50), sizeof(u32));
+    if (Saveadder != 0x200) {
+        Debug("The Agb_save partiton is corrupted. Did you run an Agb_firm game?");
+        return 1;
+    }
     return 0;
 }
