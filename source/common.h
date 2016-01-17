@@ -39,9 +39,9 @@
     (((v) % (a)) ? ((v) + (a) - ((v) % (a))) : (v))
     
 // work files / directories
-#define GAME_DIR "/D9Game"
-#define WORK_DIR "/Decrypt9"
-#define LOG_FILE "Decrypt9.log"
+#define GAME_DIR "/Agbsave9"
+#define WORK_DIR "/Agbsave9"
+#define LOG_FILE "Agbsave9.log"
 
 inline char* strupper(const char* str) {
     char* buffer = (char*)malloc(strlen(str) + 1);

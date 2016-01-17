@@ -236,7 +236,7 @@ u32 ProcessMenu(MenuInfo* info, u32 n_entries_main)
         }
         mainMenu.n_entries = n_entries_main;
         #ifndef BUILD_NAME
-        mainMenu.name = "Decrypt9 Main Menu";
+        mainMenu.name = "Agbsave9 Main Menu";
         #else
         mainMenu.name = BUILD_NAME;
         #endif
