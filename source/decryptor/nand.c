@@ -641,8 +641,8 @@ u32 DumpAgbSave(u32 parm)
     DecryptNandToMem(Header, p_info->offset, NAND_SECTOR_SIZE, p_info);
     u32 Saveadder;
     memcpy(&Saveadder, Header + (sizeof(u8) * 0x50), sizeof(u32));
-    u8 *Magic = ".SAV";
-    if (Saveadder != 0x200 || !memcmp(Magic, Header, sizeof(u32)) {
+    char *Magic = ".SAV";
+    if (Saveadder != 0x200 || !memcmp(Magic, Header, sizeof(u32))) {
         Debug("The Agb_save partiton is corrupted.");
         Debug("Did you run an Agb_firm game?");
         return 1;
