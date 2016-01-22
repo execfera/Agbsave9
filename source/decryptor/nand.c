@@ -649,6 +649,8 @@ u32 DumpAgbSave(u32 parm)
     }
     u32 Savesize;
     memcpy(&Savesize, Header + (sizeof(u8) * 0x54), sizeof(u32));
-    Debug("Title id %x%x", Header + 0x38);
+    u32 Titleid;
+    memcpy(&Titleid, Header + 0x38, 4);
+    Debug("Title id %08x", Titleid);
     return DecryptNandToFile("agb_dump.sav", p_info->offset + Saveadder, Savesize, p_info);
 }
