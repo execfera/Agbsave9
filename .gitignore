@@ -11,3 +11,5 @@ agb_inject/build/
 agb_inject/inject.sav
 agb_inject/out.gba
 agb_inject/out.sav
+agb_inject/out.cia
+agb_inject/gba.cxi
