@@ -7,7 +7,7 @@ void sram() {
 	
 	u8 volatile *sram = (void *)SRAM;
 	int x;
-	for(x = 0; x <= 65536 /2 ; x++) {
+	for(x = 0; x <= 32768; x++) {
 		sram[x] = save[x];
 	}
 }
@@ -31,14 +31,14 @@ void flash() {
 	*command1 = 0xAA; //erase entire flash
 	*command2 = 0x55;
 	*command1 = 0x10;
-	while(*flash != 0xFF);
+	while(*flash != 0xFF); // Wait for flash to be erased
 	int x;
 	for(x = 0; x <= 65536 ; x++) {
 		*command1 = 0xAA; // Write byte
 		*command2 = 0x55;
 		*command1 = 0xA0;
 		flash[x] = save[x];
-		while(flash[x] != save[x]);
+		while(flash[x] != save[x]); // Wait for byte to be written
 	}
 } 
 
@@ -54,5 +54,5 @@ int main() {
 	} else {
 		flash();
 	}
-	iprintf("AGB_FIRM save injecter\n");
+	iprintf("AGB_FIRM save injector\n");
 }
