@@ -28,3 +28,4 @@ with open("agb_inject_mb.rsf", "wb") as f:
 os.system("./makerom -icon exefs/icon.bin " +
 "-banner exefs/banner.bin -code exefs/code.bin " +
 "-exheader exheader.bin -romfs romfs.bin -rsf agb_inject_mb.rsf -o gba.cxi")
+os.system("./makerom -contents gba.cxi:0:0 -o "+ outname)
