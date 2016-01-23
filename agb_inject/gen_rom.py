@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 import struct
 import os
+import platform
 savename = input("Type in the save's name: ")
 outname = input("Type in the output cia's name: ")
 savetype = int(input("Type in the save type: "))
@@ -25,7 +26,11 @@ with open("agb_inject_mb.rsf", "rb") as f:
 rsf[0x180 : 0x185] = bytes(titleid, "ascii")
 with open("agb_inject_mb.rsf", "wb") as f:
     f.write(rsf)
-os.system("./makerom -icon exefs/icon.bin " +
+if platform.system() == "Linux":
+    makeromname = "./makerom_linux"
+elif platform.system() == "Windows":
+    makeromname = "makerom.exe"
+os.system(makeromname + " -icon exefs/icon.bin " +
 "-banner exefs/banner.bin -code exefs/code.bin " +
 "-exheader exheader.bin -romfs romfs.bin -rsf agb_inject_mb.rsf -o gba.cxi")
-os.system("./makerom -contents gba.cxi:0:0 -o "+ outname)
+os.system(makeromname + " -contents gba.cxi:0:0 -o "+ outname)
