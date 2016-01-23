@@ -652,5 +652,12 @@ u32 DumpAgbSave(u32 parm)
     u32 Titleid;
     memcpy(&Titleid, Header + 0x38, 4);
     Debug("Title id %08x", Titleid);
+    if (Savesize == 32768) {
+        Debug("Use save type 0");
+    } else if (Savesize == 65536) {
+	Debug("Use save type 1");
+    } else {
+        Debug("Injecton support for this game is not yet ready");
+    }
     return DecryptNandToFile("agb_dump.sav", p_info->offset + Saveadder, Savesize, p_info);
 }

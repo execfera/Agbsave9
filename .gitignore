@@ -5,8 +5,8 @@
 
 .DS_Store
 
-agb_inject/agb_inject.elf
-agb_inject/agb_inject.gba
+agb_inject/agb_inject_mb.elf
+agb_inject/agb_inject_mb.gba
 agb_inject/build/
 agb_inject/inject.sav
 agb_inject/out.gba
