@@ -11,32 +11,27 @@ void sram() {
 		sram[x] = save[x];
 	}
 }
+void inline flash_command(u8 command) {
+	u8 volatile *command_addr1 = (void *)0xE005555;
+	u8 volatile *command_addr2 = (void *)0xE002AAA;
+	*command_addr1 = 0xAA;
+	*command_addr2 = 0x55;
+	*command_addr1 = command;
+}
 
 void flash() {
 	u8 const *save = (void *)0x8020000;
 	u8 volatile *flash = (void *)0xE000000;
-	u8 volatile *command1 = (void *)0xE005555;
-	u8 volatile *command2 = (void *)0xE002AAA;
-	*command1 = 0xAA; // Enter id mode
-	*command2 = 0x55;
-	*command1 = 0x90;
+	flash_command(0x90); // Enter id mode
 	flash[0]; // read manufacuer
 	flash[1]; // read dev
-	*command1 = 0xAA; // Exit id mode
-	*command2 = 0x55;
-	*command1 = 0xF0;
-	*command1 = 0xAA; //erase command
-	*command2 = 0x55;
-	*command1 = 0x80;
-	*command1 = 0xAA; //erase entire flash
-	*command2 = 0x55;
-	*command1 = 0x10;
+	flash_command(0xF0); // Exit id mode
+	flash_command(0x80); // Erase command
+	flash_command(0x10); // Erase entire flash
 	while(*flash != 0xFF); // Wait for flash to be erased
 	int x;
 	for(x = 0; x <= 65536 ; x++) {
-		*command1 = 0xAA; // Write byte
-		*command2 = 0x55;
-		*command1 = 0xA0;
+		flash_command(0xA0); // Write byte
 		flash[x] = save[x];
 		while(flash[x] != save[x]); // Wait for byte to be written
 	}

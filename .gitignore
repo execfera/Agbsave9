@@ -14,3 +14,4 @@ agb_inject/out.sav
 agb_inject/out.cia
 agb_inject/gba.cxi
 agb_inject/exefs/code.bin
+agb_inject/header.bin

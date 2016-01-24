@@ -5,8 +5,13 @@ import platform
 savename = input("Type in the save's name: ")
 outname = input("Type in the output cia's name: ")
 savetype = int(input("Type in the save type: "))
-titleid = input("Type in the title id of the game you wish to inject: ")
-titleid = titleid[1:6]
+titleid = int(input("Type in the title id of the game you wish to inject: "), 16)
+titleid = struct.pack("<i", titleid)
+with open("exheader.bin", "rb") as f:
+    exheader = bytearray(f.read())
+exheader[0x200 : 0x200 + 4] = titleid
+with open("exheader.bin", "wb") as f:
+    f.write(exheader)
 footername = "agb_inject_mb_" + str(savetype) + ".ftr"
 with open(footername, "rb") as f:
     footer = f.read()
@@ -21,16 +26,15 @@ rom[0x1ffff] = savetype
 rom[0x20000 : 0x20000 + len(sav)] = sav
 with open("exefs/code.bin", "wb") as f:
     f.write(rom)
-with open("agb_inject_mb.rsf", "rb") as f:
-    rsf = bytearray(f.read())
-rsf[0x180 : 0x185] = bytes(titleid, "ascii")
-with open("agb_inject_mb.rsf", "wb") as f:
-    f.write(rsf)
 if platform.system() == "Linux":
     makeromname = "./makerom_linux"
 elif platform.system() == "Windows":
     makeromname = "makerom.exe"
-os.system(makeromname + " -icon exefs/icon.bin " +
-"-banner exefs/banner.bin -code exefs/code.bin " +
-"-exheader exheader.bin -romfs romfs.bin -rsf agb_inject_mb.rsf -o gba.cxi")
-os.system(makeromname + " -content gba.cxi:0:0 -o "+ outname)
+if platform.system() == "Linux":
+    dstoolname = "./3dstool_linux"
+elif platform.system() == "Windows":
+    dstoolname = "3dstool_linux.exe"
+os.system(dstoolname + " -c --header exefshead.bin --exefs-dir exefs --type exefs --file exefs.bin")
+os.system(dstoolname + " -c --extendedheader exheader.bin " +
+"--romfs romfs.bin --file gba.cxi --header header.bin --type cxi --exefs exefs.bin")
+os.system(makeromname + " -content gba.cxi:0:0 -f cia -o "+ outname)
