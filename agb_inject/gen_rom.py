@@ -12,6 +12,11 @@ with open("exheader.bin", "rb") as f:
 exheader[0x200 : 0x200 + 4] = titleid
 with open("exheader.bin", "wb") as f:
     f.write(exheader)
+with open("header.bin", "rb") as f:
+    header = bytearray(f.read())
+header[0x118 : 0x118 + 4] = titleid
+with open("header.bin", "wb") as f:
+    f.write(header)
 footername = "agb_inject_mb_" + str(savetype) + ".ftr"
 with open(footername, "rb") as f:
     footer = f.read()
