@@ -162,7 +162,7 @@ release:
 	@-cp $(OUTPUT).3dsx $(RELEASE)/$(TARGET)
 	@-cp $(OUTPUT).smdh $(RELEASE)/$(TARGET)
 	@-make --no-print-directory agb_inject
-	@-rsync -av --exclude='source' --exclude='build' --exclude='agb_inject_mb.elf' --exclude='gba.cxi' --exclude='inject.sav' --exclude='Makefile' --exclude='out*' --exclude'agb_inject/exefs/code.bin' agb_inject $(RELEASE)
+	@-rsync -av --exclude='source' --exclude='build' --exclude='agb_inject_mb.elf' --exclude='gba.cxi' --exclude='inject.sav' --exclude='Makefile' --exclude='out*' --exclude='agb_inject/exefs/code.bin' agb_inject $(RELEASE)
 	@cp $(CURDIR)/scripts/*.py $(RELEASE)/scripts
 	@-[ ! -n "$(strip $(THEME))" ] || (mkdir $(RELEASE)/$(THEME) && cp $(CURDIR)/resources/$(THEME)/*.bin $(RELEASE)/$(THEME))
 	@-7z a $(RELEASE)/$(TARGET)-`date +'%Y%m%d-%H%M%S'`.zip $(RELEASE)/*
