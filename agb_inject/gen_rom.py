@@ -33,4 +33,4 @@ elif platform.system() == "Windows":
 os.system(makeromname + " -icon exefs/icon.bin " +
 "-banner exefs/banner.bin -code exefs/code.bin " +
 "-exheader exheader.bin -romfs romfs.bin -rsf agb_inject_mb.rsf -o gba.cxi")
-os.system(makeromname + " -contents gba.cxi:0:0 -o "+ outname)
+os.system(makeromname + " -content gba.cxi:0:0 -o "+ outname)
