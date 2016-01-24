@@ -33,7 +33,7 @@ elif platform.system() == "Windows":
 if platform.system() == "Linux":
     dstoolname = "./3dstool_linux"
 elif platform.system() == "Windows":
-    dstoolname = "3dstool_linux.exe"
+    dstoolname = "3dstool.exe"
 os.system(dstoolname + " -c --header exefshead.bin --exefs-dir exefs --type exefs --file exefs.bin")
 os.system(dstoolname + " -c --extendedheader exheader.bin " +
 "--romfs romfs.bin --file gba.cxi --header header.bin --type cxi --exefs exefs.bin")
