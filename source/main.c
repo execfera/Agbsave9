@@ -34,7 +34,6 @@ MenuInfo menu[] =
             { "Update SeedDB",                &UpdateSeedDb,          N_EMUNAND }
         }
     },
-*/
     {
         NULL, 0, {}, // empty menu to signal end
     }

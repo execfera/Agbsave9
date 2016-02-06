@@ -10,6 +10,3 @@ _Tool to extract and inject agb_firm saves._
 ## Work in progress
 * Fix eeprom games.
 * Code the save injecter.
-
-## Credits
-* Archshift, d0k3, Shadowtrance & others for Decrypt9

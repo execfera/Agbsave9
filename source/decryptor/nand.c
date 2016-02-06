@@ -125,20 +125,18 @@ u32 OutputFileNameSelector(char* filename, const char* basename, char* extension
     
     u32 fn_id = 0;
     u32 fn_num = 0;
+    bool exists = false;
     char extstr[16] = { 0 };
     if (extension)
         snprintf(extstr, 15, ".%s", extension);
     Debug("Use arrow keys and <A> to choose a name");
     while (true) {
-        bool exists = false;
         char numstr[2] = { 0 };
         // build and output file name (plus "(!)" if existing)
         numstr[0] = (fn_num > 0) ? '0' + fn_num : '\0';
         snprintf(filename, 63, "%s%s%s", bases[fn_id], numstr, extstr);
-        if (FileOpen(filename)) {
-            exists = true;
+        if ((exists = FileOpen(filename)))
             FileClose();
-        }
         Debug("\r%s%s", filename, (exists) ? " (!)" : "");
         // user input routine
         u32 pad_state = InputWait();
@@ -152,11 +150,25 @@ u32 OutputFileNameSelector(char* filename, const char* basename, char* extension
         } else if ((pad_state & BUTTON_LEFT) && (fn_num > 0)) { // decrement number
             fn_num--;
         } else if (pad_state & BUTTON_A) {
-            Debug("%s", filename);
+            Debug("%s%s", filename, (exists) ? " (!)" : "");
             break;
         } else if (pad_state & BUTTON_B) {
             Debug("(cancelled by user)");
             return 2;
+        }
+    }
+    
+    // overwrite confirmation
+    if (exists) {
+        Debug("Press <A> to overwrite existing file");
+        while (true) {
+            u32 pad_state = InputWait();
+            if (pad_state & BUTTON_A) {
+                break;
+            } else if (pad_state & BUTTON_B) {
+                Debug("(cancelled by user)");
+                return 2;
+            }
         }
     }
     

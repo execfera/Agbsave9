@@ -860,7 +860,7 @@ u32 CryptCia(const char* filename, u8* ncch_crypt, bool cia_encrypt, bool cxi_on
     u32 content_count;
     u32 result = 0;
     
-    if (cia_encrypt) // no deep processing when encrypting
+    if (cia_encrypt) // process only one layer when encrypting
         ncch_crypt = NULL;
     
     if (!FileOpen(filename)) // already checked this file
