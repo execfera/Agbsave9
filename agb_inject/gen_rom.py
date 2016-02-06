@@ -3,6 +3,9 @@ import struct
 import os
 import platform
 import shutil
+import sys
+if sys.version_info[0] < 3:
+    print("Use Python3.")
 savename = input("Type in the save's name: ")
 outname = input("Type in the output cia's name: ")
 savetype = int(input("Type in the save type: "))

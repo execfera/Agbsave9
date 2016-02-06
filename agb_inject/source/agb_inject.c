@@ -30,7 +30,7 @@ void flash() {
 	flash_command(0x10); // Erase entire flash
 	while(*flash != 0xFF); // Wait for flash to be erased
 	int x;
-	for(x = 0; x <= 65536 ; x++) {
+	for(x = 0; x <= 0xFFFF ; x++) {
 		flash_command(0xA0); // Write byte
 		flash[x] = save[x];
 		while(flash[x] != save[x]); // Wait for byte to be written
