@@ -1,13 +1,14 @@
 #include <gba.h>
 #include <stdio.h>
 #include <string.h>
+#include <time.h>
 
 u8 const *save = (void *)0x8020000;
 
 void sram() {
 	u8 volatile *sram = (void *)SRAM;
 	int x;
-	for(x = 0; x <= 0x7FFE; x++) {
+	for(x = 0; x <= 0x7FFF; x++) {
 		sram[x] = save[x];
 	}
 }
@@ -38,22 +39,34 @@ void flash() {
 } 
 
 void eeprom() {
-	u16 buffer[73];
-	memset(buffer, 0, sizeof(u16) * 73);
-	u16 x;
+	u16 buffer[81];
+	int x;
 	int z;
-	for(x = 0; x <= 512; x += 8) {
-		for(z = 0; z <= 64; z++) {
-			if ((save[x + (z / 8)] & 1 << z % 8) != 0) {
-				buffer[z + 1] = 1;
+	int i;
+	int volatile v;
+	buffer[0] = 1; // Read from eeprom
+	buffer[1] = 1;
+	dmaCopy(buffer, (void *)0xDFFFF00, 17 << 1);
+	dmaCopy((void *)0xDFFFF00, buffer, 68 << 1);
+	for(x = 0; x <= 0x1FFF; x += 8) {
+		memset(buffer, 0, sizeof(u16) * 81);
+		buffer[0] = 1;
+		for(z = 0; z <= 13; z++) {
+			if (((x / 8) & (1 << (13 - z))) != 0)
+				buffer[z + 2] = 1;
+		}
+		for(i = 0; i <= 7; i++) {
+			for(z = 0; z <= 7; z++) {
+				if ((save[x + i] & (1 << (7 - z))) != 0) {
+					buffer[z + 16 + (i * 8)] = 1;
+				}
 			}
 		}
-		for(z = 65; z <= 71; z++) {
-			buffer[z] = x & 1 << z % 8;
+		dmaCopy(buffer, (void *)0xDFFFF00, 81 << 1);
+		for(v = 0; v <= 27092; v++); // Wait until eeprom should be written
+		if (x % 200 == 0) {
+			iprintf("%d: Bytes written\n", x);
 		}
-		buffer[72] = 1;
-		dmaCopy(buffer, (void *)0xDFFFF00, 73 << 1);
-		while((*(u8 *)0xDFFFF00 & 1) != 1); // Wait for data to be written.
 	}
 }
 

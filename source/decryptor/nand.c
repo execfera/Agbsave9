@@ -646,6 +646,19 @@ u32 InjectNandPartition(u32 param)
     return EncryptFileToNand(filename, p_info->offset, p_info->size, p_info);
 }
 
+uint64_t bswap64(uint64_t a)
+{
+  a = ((a & 0x00000000000000FFULL) << 56) | 
+      ((a & 0x000000000000FF00ULL) << 40) | 
+      ((a & 0x0000000000FF0000ULL) << 24) | 
+      ((a & 0x00000000FF000000ULL) <<  8) | 
+      ((a & 0x000000FF00000000ULL) >>  8) | 
+      ((a & 0x0000FF0000000000ULL) >> 24) | 
+      ((a & 0x00FF000000000000ULL) >> 40) | 
+      ((a & 0xFF00000000000000ULL) >> 56);
+  return a;
+}
+
 u32 DumpAgbSave(u32 parm)
 {
     PartitionInfo* p_info = GetPartitionInfo(P_AGBSAVE);
@@ -654,7 +667,7 @@ u32 DumpAgbSave(u32 parm)
     u32 Saveadder;
     memcpy(&Saveadder, Header + (sizeof(u8) * 0x50), sizeof(u32));
     char *Magic = ".SAV";
-    if (Saveadder != 0x200 || memcmp(Magic, Header, sizeof(u32))) {
+    if (Saveadder != 0x200 || memcmp(Magic, Header, 4)) {
         Debug("The Agb_save partiton is corrupted.");
         Debug("Did you run an Agb_firm game?");
         return 1;
@@ -668,8 +681,23 @@ u32 DumpAgbSave(u32 parm)
         Debug("Use save type 0");
     } else if (Savesize == 65536) {
 	Debug("Use save type 1");
+    } else if (Savesize == 0x2000) {
+	Debug("Use save type 2");
     } else {
         Debug("Injecton support for this game is not yet ready");
     }
-    return DecryptNandToFile("agb_dump.sav", p_info->offset + Saveadder, Savesize, p_info);
+    if (Savesize == 0x2000) {
+        u8* buffer = BUFFER_ADDRESS;
+        int x;
+        DecryptNandToMem(buffer, p_info->offset + Saveadder, Savesize, p_info);
+        u64 *u64_buffer = (u64 *)buffer;
+        for(x = 0; x <= Savesize / 8; x++) {
+            u64_buffer[x] = bswap64(u64_buffer[x]);
+        }
+        DebugFileCreate("agb_dump.sav", true);
+        DebugFileWrite(buffer, Savesize, 0);
+        return 0;
+    } else {
+        return DecryptNandToFile("agb_dump.sav", p_info->offset + Saveadder, Savesize, p_info);
+    }
 }
