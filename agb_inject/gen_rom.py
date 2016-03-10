@@ -14,7 +14,7 @@ if sys.version_info[0] < 3:
     print("Use Python3.")
 savename = input("Type in the save's name: ")
 outname = input("Type in the output cia's name: ")
-savetype = int(input("Type in the save type: "))
+savetype = int(input("Type in the save type (0: SRAM, 1: Flash, 2: EEPROM): "))
 titleid = input("Type in the title id of the game you wish to inject: ")
 os.mkdir(ScriptPath + "tmp")
 try:

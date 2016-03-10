@@ -3,6 +3,7 @@
 #include "hid.h"
 #include "platform.h"
 #include "decryptor/aes.h"
+#include "decryptor/sha.h"
 #include "decryptor/decryptor.h"
 #include "decryptor/nand.h"
 #include "fatfs/sdmmc.h"
@@ -103,6 +104,86 @@ static inline int WriteNandSectors(u32 sector_no, u32 numsectors, u8 *in)
         }
         return sdmmc_sdcard_writesectors(sector_no + emunand_offset, numsectors, in);
     } else return sdmmc_nand_writesectors(sector_no, numsectors, in);
+}
+
+u32 SetupNandCrypto(u8* ctr, u32 offset)
+{
+    static bool initial_setup_done = false;
+    static u8 CtrNandCtr[16];
+    //static u8 TwlNandCtr[16];
+    
+    if (!initial_setup_done) {
+        // CTRNAND
+        u8 NandCid[16];
+        u8 shasum[32];
+        
+        sdmmc_get_cid( 1, (uint32_t*) NandCid);
+        sha_init(SHA256_MODE);
+        sha_update(NandCid, 16);
+        sha_get(shasum);
+        memcpy(CtrNandCtr, shasum, 16);
+        
+        /*sha_init(SHA1_MODE);
+        sha_update(NandCid, 16);
+        sha_get(shasum);
+        for(u32 i = 0; i < 16; i++) // little endian and reversed order
+            TwlNandCtr[i] = shasum[15-i];
+        
+        Debug("NAND CID: %08X%08X%08X%08X", getbe32(NandCid), getbe32(NandCid+4), getbe32(NandCid+8), getbe32(NandCid+12));
+        
+        // part #2: TWL KEY
+        // see: https://www.3dbrew.org/wiki/Memory_layout#ARM9_ITCM
+        u32* TwlCustId = (u32*) (0x01FFB808+8);
+        u8 TwlKeyX[16];
+        u8 TwlKeyY[16];
+        
+        Debug("TWL Customer ID: %08X%08X", TwlCustId[0], TwlCustId[1]);
+        
+        // see source from https://gbatemp.net/threads/release-twltool-dsi-downgrading-save-injection-etc-multitool.393488/
+        const char* nintendo = "NINTENDO";
+        u32* TwlKeyXW = (u32*) TwlKeyX;
+        TwlKeyXW[0] = (TwlCustId[0] ^ 0xB358A6AF) | 0x80000000;
+        TwlKeyXW[3] = TwlCustId[1] ^ 0x08C267B7;
+        memcpy(TwlKeyX + 4, nintendo, 8);
+        
+        // see: https://www.3dbrew.org/wiki/Memory_layout#ARM9_ITCM
+        u32 TwlKeyYW3 = 0xE1A00005;
+        memcpy(TwlKeyY, (u8*) 0x01FFD3C8, 12);
+        memcpy(TwlKeyY + 12, &TwlKeyYW3, 4);
+        
+        setup_aeskeyX(0x03, TwlKeyX);
+        setup_aeskeyY(0x03, TwlKeyY);
+        Debug("0x03 KeyX: %08X%08X%08X%08X", getbe32(TwlKeyX), getbe32(TwlKeyX+4), getbe32(TwlKeyX+8), getbe32(TwlKeyX+12));
+        Debug("0x03 KeyY: %08X%08X%08X%08X", getbe32(TwlKeyY), getbe32(TwlKeyY+4), getbe32(TwlKeyY+8), getbe32(TwlKeyY+12));
+        
+        // part #3: CTRNAND N3DS KEY
+        while (GetUnitPlatform() == PLATFORM_N3DS) {
+            u8 CtrNandKeyY[16];
+            
+            if (!FileOpen("slot0x05KeyY.bin")) {
+                Debug("0x05 KeyY: not set, slot0x05KeyY.bin not found");
+                break;
+            }
+            if (FileRead(CtrNandKeyY, 16, 0) != 16) {
+                Debug("0x05 KeyY: not set, bad file");
+                FileClose();
+                break;
+            }
+            FileClose();
+            
+            setup_aeskeyY(0x05, CtrNandKeyY);
+            Debug("0x05 KeyY: %08X%08X%08X%08X", getbe32(CtrNandKeyY), getbe32(CtrNandKeyY+4), getbe32(CtrNandKeyY+8), getbe32(CtrNandKeyY+12));
+            break;
+        }*/
+        
+        initial_setup_done = true;
+    }
+    
+    // get the correct CTR and increment counter
+    memcpy(ctr, CtrNandCtr, 16);
+    add_ctr(ctr, offset / 0x10);
+
+    return 0;
 }
 
 u32 OutputFileNameSelector(char* filename, const char* basename, char* extension, bool emuname) {
@@ -404,7 +485,7 @@ u32 GetNandCtr(u8* ctr, u32 offset)
 u32 DecryptNandToMem(u8* buffer, u32 offset, u32 size, PartitionInfo* partition)
 {
     CryptBufferInfo info = {.keyslot = partition->keyslot, .setKeyY = 0, .size = size, .buffer = buffer, .mode = partition->mode};
-    if(GetNandCtr(info.ctr, offset) != 0)
+    if(SetupNandCrypto(info.ctr, offset) != 0)
         return 1;
 
     u32 n_sectors = (size + NAND_SECTOR_SIZE - 1) / NAND_SECTOR_SIZE;
@@ -668,23 +749,23 @@ u32 DumpAgbSave(u32 parm)
     memcpy(&Saveadder, Header + (sizeof(u8) * 0x50), sizeof(u32));
     char *Magic = ".SAV";
     if (Saveadder != 0x200 || memcmp(Magic, Header, 4)) {
-        Debug("The Agb_save partiton is corrupted.");
-        Debug("Did you run an Agb_firm game?");
+        Debug("The AGBSAVE partition is corrupted.");
+        Debug("Did you run a GBA VC game?");
         return 1;
     }
     u32 Savesize;
     memcpy(&Savesize, Header + (sizeof(u8) * 0x54), sizeof(u32));
     u32 Titleid;
     memcpy(&Titleid, Header + 0x38, 4);
-    Debug("Title id %08x", Titleid);
+    Debug("Title ID: %08x", Titleid);
     if (Savesize == 32768) {
-        Debug("Use save type 0");
+        Debug("Use save type 0: SRAM");
     } else if (Savesize == 65536) {
-	Debug("Use save type 1");
+	Debug("Use save type 1: Flash");
     } else if (Savesize == 0x2000) {
-	Debug("Use save type 2");
+	Debug("Use save type 2: EEPROM");
     } else {
-        Debug("Injecton support for this game is not yet ready");
+        Debug("Injection support for this game is not yet ready");
     }
     if (Savesize == 0x2000) {
         u8* buffer = BUFFER_ADDRESS;
